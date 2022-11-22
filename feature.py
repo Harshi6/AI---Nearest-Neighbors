@@ -106,4 +106,48 @@ def backward_elimination(features_count, IN_FILE, start):
 					add = features
 				if acc > global_acc:
 					global_acc = acc
-					add = 
+					add = feautures
+def leave_one_out(ft, data, curr):
+	
+	size = len(data.index)
+
+	valid = 0
+
+	new = data.copy(deep=True)
+	nd = new.to_numpy(dtype='float', na_value=np.nan)
+	
+	for f in range(1, ft):
+		if f not in curr:
+			nd[:, f] = 0
+	
+	for r in range(0, size):
+		
+		checking = nd[r][1:]
+		label = nd[r][0]
+		nn_d = sys.maxsize
+		loc = sys.maxsize 
+		
+		for i in range(0, size):
+		
+			if i == r:
+				continue
+			
+			if i != r:
+				
+				dist = math.sqrt(sum(np.power((checking - nd[i][1:]), 2)))
+		
+				if dist < nn_d:
+					loc = i
+					nearest_n_label = nd[loc][0]
+					nn_d = dist
+					
+	
+		if label == nearest_n_label:
+			valid += 1
+	
+	acc = valid / size
+	
+	return acc
+
+	
+main()				
