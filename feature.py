@@ -11,45 +11,45 @@ import sys
 import time
 #used for keeping track of runtime
 
-
 def main():
 	print("Welcome to Harshi Doddapaneni\'s Feature Selection Algorithm!")
-
+	#Get the test file from user input
 	IN_FILE = input("Type in the name of the file to test: ")
 	#reading the file
 	test = open(IN_FILE, 'r')
 	read = csv.reader(test,delimiter=' ',skipinitialspace=True)
-
+	#find number of features
 	features_count = len(next(read)) 
 	#find the number of instances
 	inst = pd.read_csv(IN_FILE)
 	instances_count= len(inst) + 1
-
+	#ask user which algorithm they would like to use    
 	question = "\nType the number of the algorithm you want to run.\n"
 	question += "1.Forward Selection\n"
 	question += "2.Backward Elimination"
 	print(question)
-
+	#get user input
 	alg = int(input())
 	fc = features_count - 1
-
+	#print number of features and instances in the dataset
 	print("This dataset has {} features (not including the class attribute), with {} instances\n".format(fc,instances_count))
-
+	#getting all features
 	fts = []
 	for i in range(1, features_count):
 		fts.append(i)
+	#getting accuracy
 	df = pd.read_fwf(IN_FILE, header=None)
 	data = df.copy(deep=True)[:-1]
 	acc = leave_one_out(features_count,data,fts)
 	print("Running nearest neighbor with all {} features, using \"leaving-one-out\" evalutation, I get an accuracy of {}%\n".format(fc, acc))
-
-
+	#follow through accordingly based on user answer
+	#Begin searching! 
 	if alg == 1:
-
+		#start timer as search is starting
 		start = time.time()
 		forward_selection(features_count,IN_FILE,start)
 	if alg == 2:
-
+		#start timer as search is starting
 		start = time.time()
 		backward_elimination(features_count,IN_FILE,start)
 
@@ -220,11 +220,11 @@ def leave_one_out(ft, data, curr):
 				#updating the least dist, and keeping track of the corresponding instance loc
 				if dist < nn_d:
 					loc = i
-					nearest_n_label = nd[loc][0]
+					nn_label = nd[loc][0] #getting class label
 					nn_d = dist
 					
 		# we are checking to see if they are classified correctly based on class
-		if label == nearest_n_label:
+		if label == nn_label:
 			valid += 1
 	#accuracy = number of correct classifications / number of instances in our database
 	acc = valid / size
