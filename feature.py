@@ -173,46 +173,47 @@ def backward_elimination(features_count, IN_FILE, start):
 	#return runtime
 	print("Time took: {} seconds".format(ti))
 def leave_one_out(ft, data, curr):
-	
+	#rows
 	size = len(data.index)
-
+	#correct answers counter
 	valid = 0
-
+	#just converting
 	new = data.copy(deep=True)
 	nd = new.to_numpy(dtype='float', na_value=np.nan)
-	
+	#setting them to 0 since we dont look at them
 	for f in range(1, ft):
 		if f not in curr:
 			nd[:, f] = 0
-	
+	#checking distances
 	for r in range(0, size):
-		
+		#classifying process 
 		checking = nd[r][1:]
 		label = nd[r][0]
-		nn_d = sys.maxsize
-		loc = sys.maxsize 
+		nn_d = sys.maxsize #nearest neighbor distance, setting to INT_MAX
+		loc = sys.maxsize #tracking location, setting to INT_MAX
 		
 		for i in range(0, size):
-		
+			#making sure we are not checking same row
 			if i == r:
 				continue
-			
+			#different row
 			if i != r:
-				
+				#calculating euclidean distance
 				dist = math.sqrt(sum(np.power((checking - nd[i][1:]), 2)))
-		
+				#updating the least dist, and keeping track of the corresponding instance loc
 				if dist < nn_d:
 					loc = i
 					nearest_n_label = nd[loc][0]
 					nn_d = dist
 					
-	
+		# we are checking to see if they are classified correctly based on class
 		if label == nearest_n_label:
 			valid += 1
-	
+	#accuracy = number of correct classifications / number of instances in our database
 	acc = valid / size
-	
+	p = acc * 100 #converting to percentage
+	acc = round(p,1) #precision
 	return acc
 
-	
-main()				
+#start	
+main()		
