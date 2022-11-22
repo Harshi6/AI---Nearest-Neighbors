@@ -44,3 +44,19 @@ def main():
 
 		start = time.time()
 		backward_elimination(features_count,IN_FILE,start)
+
+def forward_selection(features_count, IN_FILE, start):
+	print("Beginning search.\n")
+	df = pd.read_fwf(IN_FILE, header=None)
+	data = df.copy(deep=True)[:-1]
+	ans = []
+	fseen = []
+	acc = 0
+
+def backward_elimination(features_count, IN_FILE, start):
+	print("Beginning search.\n")
+	df = pd.read_fwf(IN_FILE, header=None)
+	data = df.copy(deep=True)[:-1]
+	ans = []
+	fseen = []
+	acc = 0
