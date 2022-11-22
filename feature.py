@@ -82,3 +82,28 @@ def backward_elimination(features_count, IN_FILE, start):
 	ans = []
 	fseen = []
 	acc = 0
+	for feature in range(1, features_count):
+		fseen.append(feature)
+		ans.append(feature)
+	for i in range(1, features_count):
+
+		local_acc = 0
+
+		remove = 0
+		
+		
+		for features in range(1, features_count):
+			
+			if features not in fseen:
+			
+				dummy = copy.deepcopy(fseen)
+				dummy.append(features)
+	
+				acc = leave_one_out(features_count,data,dummy)
+			
+				if acc > local_acc:
+					local_acc = acc
+					add = features
+				if acc > global_acc:
+					global_acc = acc
+					add = 
