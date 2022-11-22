@@ -110,35 +110,68 @@ def forward_selection(features_count, IN_FILE, start):
 def backward_elimination(features_count, IN_FILE, start):
 	print("Beginning search.\n")
 	df = pd.read_fwf(IN_FILE, header=None)
+	#need for caculating accuracy
 	data = df.copy(deep=True)[:-1]
+	#answer set
 	ans = []
+	#top acc
+	global_acc = 0
+	#seen set
 	fseen = []
-	acc = 0
+	#need to get all features loaded in, for both the main answer and subset
 	for feature in range(1, features_count):
 		fseen.append(feature)
 		ans.append(feature)
+
 	for i in range(1, features_count):
-
+		#local accuracy
 		local_acc = 0
-
+		#bool to check if triggered
+		check1 = False
+		check2 = False
+		#values we will be removing based on accuracy comparisons
 		remove = 0
-		
-		
-		for features in range(1, features_count):
-			
-			if features not in fseen:
-			
+		remove2 = 0
+		for feature in range(1, features_count):
+			#if feature not in subset, then we can simply skip because it is not possible to remove it. 
+			#only need to go through iteration when it is part of the subset
+			if feature not in fseen:
+				continue
+			if feature in fseen:
+				#need to deepcopy when iterating and updating changes
 				dummy = copy.deepcopy(fseen)
-				dummy.append(features)
-	
-				acc = leave_one_out(features_count,data,dummy)
-			
-				if acc > local_acc:
-					local_acc = acc
-					add = features
-				if acc > global_acc:
-					global_acc = acc
-					add = feautures
+				dummy.remove(feature)
+				#lets get current accuracy with current set and its features. We then use this value to compare
+				curr_acc = leave_one_out(features_count, data, dummy)
+				#updating the sub and main accuracy 
+				if curr_acc > local_acc:
+					local_acc = curr_acc
+					check1 = True
+					remove = feature
+				if curr_acc > global_acc:
+					global_acc = curr_acc
+					check2 = True
+					remove2 = feature
+				print('\tUsing feature(s) ' + str(dummy) + ' accuracy is ' + str(round(curr_acc, 3)))
+		#check to see if top accuracy still greater. If so, we give warning message. If it got replaced, no warning message.
+		if check2 == False:
+			print("\n(Warning, Accuracy has decreased! Continuing search in case of local maxima)")
+			fseen.remove(remove)
+			print("Feature set {} was best, accuracy is {}%\n".format(fseen, local_acc))
+		if check2 == True:
+			#only remove from main set when top accuracy changed. Otherwise we only append to local set.
+			ans.remove(remove2)
+			fseen.remove(remove2)
+			print("\nFeature set {} was best, accuracy is {}%\n".format(fseen, global_acc))
+	#return answer
+	print("Finished search. The best feature subset is {}, which has an accuracy of {}%".format(ans, global_acc))
+	#stop timer
+	end = time.time()
+	t = end - start
+	#precision
+	ti = round(t,2)
+	#return runtime
+	print("Time took: {} seconds".format(ti))
 def leave_one_out(ft, data, curr):
 	
 	size = len(data.index)
