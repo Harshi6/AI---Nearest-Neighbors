@@ -48,32 +48,64 @@ def main():
 def forward_selection(features_count, IN_FILE, start):
 	print("Beginning search.\n")
 	df = pd.read_fwf(IN_FILE, header=None)
+	#need for caculating accuracy
 	data = df.copy(deep=True)[:-1]
+	# tracking answer set
 	ans = []
+	#tracking the features that we have already seen
 	fseen = []
-	acc = 0
+	#top acc
+	global_acc = 0
+	
 	for i in range(1, features_count):
-
+		#tracking local accuracy in the curr level
 		local_acc = 0
-
+		#values we will be appending based on accuracy comparisons
 		add = 0
-		
-		
+		add2 = 0
+		#bool to check if triggered
+		check1 = False
+		check2 = False
 		for features in range(1, features_count):
-			
+			if features in fseen:
+				continue
+			# we do not need to compare the same one. Ex. If 4 is already in set, we don't need to add it and compare
+			#therefore we make sure it is not already in subset
 			if features not in fseen:
-			
+				#need to deepcopy when iterating and updating changes
 				dummy = copy.deepcopy(fseen)
 				dummy.append(features)
-	
+				#lets get current accuracy with current set and its features
 				acc = leave_one_out(features_count,data,dummy)
-			
+				#checking for new max acc and updating accordingly, both global and local accuracy
 				if acc > local_acc:
 					local_acc = acc
+					check1 = True
 					add = features
 				if acc > global_acc:
 					global_acc = acc
-					add = features
+					check2 = True
+					add2 = features
+				print("\tUsing feature(s) {} accuracy is {}%".format(dummy,acc))
+		#check to see if top accuracy still greater. If so, we give warning message. If it got replaced, no warning message.		
+		if check2 == False:
+			print("\n(Warning, Accuracy has decreased! Continuing search in case of local maxima)")
+			fseen.append(add)
+			print("Feature set {} was best, accuracy is {}%\n".format(fseen, local_acc))
+		if check2 == True:
+			#only append in ans set when top accuracy changed. Otherwise we only append to local set.
+			ans.append(add2)
+			fseen.append(add2)
+			print("\nFeature set {} was best, accuracy is {}%\n".format(fseen, global_acc))
+	#return answer
+	print("Finished search. The best feature subset is {}, which has an accuracy of {}%".format(ans, global_acc))
+	#stop timer
+	end = time.time()
+	t = end - start
+	#precision
+	ti = round(t,2)
+	#return runtime
+	print("Time took: {} seconds".format(ti))
 					
 def backward_elimination(features_count, IN_FILE, start):
 	print("Beginning search.\n")
