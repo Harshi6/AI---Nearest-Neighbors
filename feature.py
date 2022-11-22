@@ -1,7 +1,15 @@
 import csv
 import numpy as np
 import pandas as pd
-
+#used for reading files easier
+import math
+#used for square root
+import copy
+#copy used for deepcopy
+import sys
+#used for INT_MAX
+import time
+#used for keeping track of runtime
 
 
 def main():
@@ -45,6 +53,9 @@ def main():
 		start = time.time()
 		backward_elimination(features_count,IN_FILE,start)
 
+#start at the top, then we go through every feature and select best one. Then we look at subsets and choose the following best subset.
+#important to keep track of a main main accuaracy score and a sub_accuracy score. main accuracy score will be used to find the 
+#best feature set out of all of them. Sub_accuracy score will be used to find the best accuracy score within that current level and its options
 def forward_selection(features_count, IN_FILE, start):
 	print("Beginning search.\n")
 	df = pd.read_fwf(IN_FILE, header=None)
@@ -76,17 +87,17 @@ def forward_selection(features_count, IN_FILE, start):
 				dummy = copy.deepcopy(fseen)
 				dummy.append(features)
 				#lets get current accuracy with current set and its features
-				acc = leave_one_out(features_count,data,dummy)
+				curr_acc = leave_one_out(features_count,data,dummy)
 				#checking for new max acc and updating accordingly, both global and local accuracy
-				if acc > local_acc:
-					local_acc = acc
+				if curr_acc > local_acc:
+					local_acc = curr_acc
 					check1 = True
 					add = features
-				if acc > global_acc:
-					global_acc = acc
+				if curr_acc > global_acc:
+					global_acc = curr_acc
 					check2 = True
 					add2 = features
-				print("\tUsing feature(s) {} accuracy is {}%".format(dummy,acc))
+				print("\tUsing feature(s) {} accuracy is {}%".format(dummy,curr_acc))
 		#check to see if top accuracy still greater. If so, we give warning message. If it got replaced, no warning message.		
 		if check2 == False:
 			print("\n(Warning, Accuracy has decreased! Continuing search in case of local maxima)")
@@ -106,7 +117,12 @@ def forward_selection(features_count, IN_FILE, start):
 	ti = round(t,2)
 	#return runtime
 	print("Time took: {} seconds".format(ti))
-					
+
+#backward is similar to forward search but this time we start from the opposite side.
+#in forward, you start with nothing and you compare the best options and append them to the set
+#this time in backward, we will start from the end. So now we start with all of the features in the set
+#then using accuracy comparisons, we can decide which features to throw away or remove from the set
+#we will keep track of the main acc (all time best) and sub accuracy for according level
 def backward_elimination(features_count, IN_FILE, start):
 	print("Beginning search.\n")
 	df = pd.read_fwf(IN_FILE, header=None)
@@ -152,7 +168,7 @@ def backward_elimination(features_count, IN_FILE, start):
 					global_acc = curr_acc
 					check2 = True
 					remove2 = feature
-				print('\tUsing feature(s) ' + str(dummy) + ' accuracy is ' + str(round(curr_acc, 3)))
+				print("\tUsing feature(s) {} accuracy is {}%".format(dummy,curr_acc))
 		#check to see if top accuracy still greater. If so, we give warning message. If it got replaced, no warning message.
 		if check2 == False:
 			print("\n(Warning, Accuracy has decreased! Continuing search in case of local maxima)")
@@ -172,6 +188,7 @@ def backward_elimination(features_count, IN_FILE, start):
 	ti = round(t,2)
 	#return runtime
 	print("Time took: {} seconds".format(ti))
+
 def leave_one_out(ft, data, curr):
 	#rows
 	size = len(data.index)
@@ -216,4 +233,4 @@ def leave_one_out(ft, data, curr):
 	return acc
 
 #start	
-main()		
+main()
